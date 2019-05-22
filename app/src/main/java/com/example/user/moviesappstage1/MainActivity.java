@@ -25,9 +25,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
-
 public class MainActivity extends AppCompatActivity {
-
     private TextView error_msg;
     private ProgressBar progressBar;
 
@@ -38,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String VOTE_COUNT="vote_average";
     public static final String RELEASE_DATE="release_date";
     public static final String SYNOPSIS="overview";
+    public String jsondata;
 
 
     @Override
@@ -53,7 +52,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(g);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recyclerAdapter);
-        if(!networkinfo())
+        if(savedInstanceState!=null){
+            jsondata=savedInstanceState.getString("KEY");
+            try {
+                String[] strings=JsonInformation.getData(jsondata);
+                recyclerAdapter.fitImages(strings);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (!networkinfo())
         {
             recyclerView.setVisibility(View.INVISIBLE);
         }
@@ -64,15 +72,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        Log.i("Instance state","onSaveInstanceState");
-        super.onSaveInstanceState(outState, outPersistentState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.i("Instance state","onRestoreInstanceState");
-        super.onRestoreInstanceState(savedInstanceState);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(jsondata!=null){
+            outState.putString("KEY",jsondata);
+        }
     }
 
     public Boolean networkinfo()
@@ -151,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 recyclerView.setVisibility(View.VISIBLE);
                 try {
                    String[] strings=JsonInformation.getData(s);
+                   jsondata=s;
                    recyclerAdapter.fitImages(strings);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -160,3 +165,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+
+
+ 
